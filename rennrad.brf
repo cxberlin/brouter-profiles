@@ -183,7 +183,7 @@ assign smoothnesspenalty =
   switch smoothness=intermediate            0.3
   switch smoothness=bad                     1
   switch smoothness=very_bad                2
-  switch smoothness=horrible		        4.5
+  switch smoothness=horrible                4.5
                                             0
 
 assign surfacepenalty

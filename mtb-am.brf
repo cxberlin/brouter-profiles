@@ -559,7 +559,7 @@ assign downhillcostfactor =
       else if hw_major_penalty                          then add dh_penalty hw_major_penalty
       else if hw_minor_penalty                          then add dh_penalty hw_minor_penalty
 
-      else if highway=path then switch segregated=no	add 1 footway_penalty 1
+      else if highway=path then switch segregated=no    add 1 footway_penalty 1
       else if highway=steps                             # first try to use incline
         then if equal inclination 1                     then steps_uh_penalty
         else if equal inclination -1                    then steps_dh_penalty

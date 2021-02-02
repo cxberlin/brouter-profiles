@@ -3,10 +3,10 @@
 #  it avoids small tracks because these tracks are often not ridable and need to be explored
 #  if no offread track is suitable it falls back to low traffic paved roads
 #  main adjustments are done via:
-#				- surfacepenalty
-# 				- tracktypepenalty
-#				- smoothnesspenalty
-# 				- costfactor for highway types
+#                - surfacepenalty
+#                 - tracktypepenalty
+#                - smoothnesspenalty
+#                 - costfactor for highway types
 #
 #  This profile, developed by Ess Bee, is based on the "fastbike-lowtraffic" profile
 #   it is intended for road cyclists who ride alone and / or in the middle of the week: thus trucks and high traffic are avoided
@@ -187,8 +187,8 @@ assign tracktypepenalty
         switch tracktype=grade5              2 0
 
 assign trafficpenalty =
-#	if any_cycleway then   0
-#	else
+#    if any_cycleway then   0
+#    else
 if highway=primary|primary_link then
     (
       if   estimated_traffic_class=1|2  then 0
@@ -223,7 +223,7 @@ assign smoothnesspenalty =
   switch smoothness=intermediate            0.0
   switch smoothness=bad                     1
   switch smoothness=very_bad                2
-  switch smoothness=horrible		     4.5
+  switch smoothness=horrible                4.5
                                             0
 
 assign maxspeedpenalty =
@@ -311,7 +311,7 @@ assign cycleway_surfacepenalty
 #        switch cycleway:smoothness=intermediate                               0.3
 #        switch cycleway:smoothness=bad                                        1
 #        switch cycleway:smoothness=very_bad                                   2
-#        switch cycleway:smoothness=horrible		                            4.5
+#        switch cycleway:smoothness=horrible                                    4.5
 #        0
 
 # temporary...
@@ -391,7 +391,7 @@ assign isgoodforcars = if greater priorityclassifier 6 then true
 # ... encoded into a bitmask
 
 assign classifiermask
-#      add          isbadoneway	# no voice hint if 1 of the 2 possibilities is badoneway
+#      add          isbadoneway    # no voice hint if 1 of the 2 possibilities is badoneway
                       add multiply isgoodoneway   2
                       add multiply isroundabout   4
                       add multiply islinktype     8
