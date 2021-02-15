@@ -178,12 +178,12 @@ assign trafficpenalty =
     else trafficpenalty0
   )
   else 0
-  
+
 assign smoothnesspenalty =
   switch smoothness=intermediate            0.3
   switch smoothness=bad                     1
   switch smoothness=very_bad                2
-  switch smoothness=horrible		        4.5
+  switch smoothness=horrible                4.5
                                             0
 
 assign surfacepenalty
@@ -195,25 +195,25 @@ assign surfacepenalty
         switch surface=cobblestone|sett switch smoothness=good|excellent  1 2 # Kopfsteinpflaster
 #       switch surface=unhewn_cobblestone                            3        # ungeschnitzter Pflasterstein
         switch concrete=lanes                                        3        # Betonspurplatten
-        switch surface=fine_gravel|compacted                         4        # Splitt,verdichtete Oberflaesche  
-        switch surface=grass_paver                                   5        # Rasengittersteine 
+        switch surface=fine_gravel|compacted                         4        # Splitt,verdichtete Oberflaesche
+        switch surface=grass_paver                                   5        # Rasengittersteine
         switch surface=gravel|sand|pebblestone|unpaved               10       # Schotter, Sand, Kies, unbefestigt
         switch surface=ground|grass|dirt|earth|mud|clay              25       # naturbelassene Oberfl sche, Gras, Schutz Schlamm...
-# if "surface" is not defined...        
-        switch surface= 
+# if "surface" is not defined...
+        switch surface=
 #      then, for Primary, secondary and tertiary asphalt is very probable
                switch highway=primary|primary_link|secondary|secondary_link|tertiary|tertiary_link 0
-#      then, for residential & Co. probably asphalt..          
-               switch highway=road|residential|unclassified          0.1 
+#      then, for residential & Co. probably asphalt..
+               switch highway=road|residential|unclassified          0.1
 #      then, for living_street something paved ..
                switch highway=living_street                          0.3
 #      then, for "service & cycleway"  possibly good (but not sure!) ...
-               switch highway=service|cycleway 0.5 
+               switch highway=service|cycleway 0.5
 # in some cases only smoothness is tagged but surface not!
                switch smoothness=intermediate|good|excellent         0
-# else, check if tracktype=grade1, then it is "something" paved, so middle penalty 
+# else, check if tracktype=grade1, then it is "something" paved, so middle penalty
                switch tracktype=grade1                               0.9
-# if a cycleroute is defined, surface can not be horrible...               
+# if a cycleroute is defined, surface can not be horrible...
                switch any_cycleroute                                 3.5 5
 # surface not known and probably not paved / no asphalt...
                                                                      5
