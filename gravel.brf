@@ -148,7 +148,6 @@ assign onewaypenalty =
 
 assign surfacepenalty
         switch surface=asphalt                                       1.5
-        switch surface=sett switch smoothness=good|excellent         0.1  0.3 # behauene Pflastersteine
         switch surface=paved switch smoothness=good|excellent        0.3  0.4 # befestigte(harte)Oberfl sche
         switch concrete=plates                                       1.5        # Betonplattenwege
         switch surface=concrete|paving_stones|wood|metal             0.5      # Beton, Pflastersteine (geschnitzt), Holz, Metall
