@@ -1,0 +1,202 @@
+#  new copy from  "fastbike-verylowtraffic.brf" -- Version 25.05.2020
+#  goal is a long-distance gravel profile to ride as much "gravel" and "fine-gravel" surface on tracktype = grade2
+#  it avoids small tracks because these tracks are often not ridable and need to be explored
+#  if no offread track is suitable it falls back to low traffic paved roads
+#  main adjustments are done via:
+#                - surfacepenalty
+#                 - tracktypepenalty
+#                - smoothnesspenalty
+#                 - costfactor for highway types
+#
+#  This profile, developed by Ess Bee, is based on the "fastbike-lowtraffic" profile
+#   it is intended for road cyclists who ride alone and / or in the middle of the week: thus trucks and high traffic are avoided
+#  (cyclists in group at the weekend will rather use "fastbike.brf" or "fastbike-lowprofile.brf" as groups are better respected by cars and trucks)
+#
+#     ==> where ever possible, choose:
+#     - an asphalted way (with good smoothness)
+#     - cycleways are prefered
+#     - on highway=tertiary, secondary or primary whithout any cycle_way:
+#          - avoid segments with maxspeed > 50 kmh (reduce the risk)
+#          - avoid segments with high-traffic
+#
+#  The route is calculated using the taggs of the OSM map (such as highway, surface, smoothness, maxspeed, traffic_class...)
+#
+
+---context:global   # following code refers to global config
+assign processUnusedTags false  # set to true if you want to display all tags in the "data"
+
+---context:way   # following code refers to way-tags
+
+assign cycleway_right if reversedirection=yes
+	then if cycleway:left=track|lane|shared_lane then 1 else 0
+	else if cycleway:right=track|lane|shared_lane then 1 else 0
+
+assign any_cycleway or cycleway=track|lane|shared_lane|shared or cycleway_right bicycle_road=yes
+assign any_cycleroute or route_bicycle_icn=yes or route_bicycle_ncn=yes or route_bicycle_rcn=yes route_bicycle_lcn=yes
+
+#
+# handle one-ways. On primary roads, wrong-oneways should
+# be close to forbidden, while on other ways we just add
+# 6 to the costfactor (making it at least 7 - you are allowed
+# to push your bike)
+#
+
+assign defaultaccess
+	switch access=
+		not motorroad=yes
+		switch or access=private or access=no access=permissive 0
+	1
+	
+#
+# calculate logical bike access
+#
+assign bikeaccess
+	or any_cycleroute switch bicycle=
+		switch vehicle=
+			defaultaccess
+			switch or vehicle=private vehicle=no 0
+			1
+	not or bicycle=private or bicycle=no bicycle=dismount
+
+#
+# calculate logical foot access
+#
+assign footaccess
+	or bikeaccess or bicycle=dismount
+		switch foot=
+			defaultaccess
+			not or foot=private foot=no
+
+#
+# if not bike-, but foot-acess, just a moderate penalty,
+# otherwise access is forbidden
+#
+assign accesspenalty
+	switch bikeaccess 0
+		switch footaccess 10
+			10000
+
+
+assign badoneway =
+	if reversedirection=yes then
+		if oneway:bicycle=yes then true
+		else if oneway= then junction=roundabout
+		else oneway=yes|true|1
+	else oneway=-1
+
+assign onewaypenalty =
+	if ( badoneway ) then
+	(
+		if ( highway=primary|primary_link ) then					50
+		else if ( highway=secondary|secondary_link ) then	30
+		else if ( highway=tertiary|tertiary_link ) then			20
+		else 6.0
+	)
+	else 0.0
+
+assign surfacepenalty
+	switch surface=asphalt																	1.0		# asphalt
+	switch surface=paved																		0.0		# befestigte(harte)Oberfl sche
+	switch concrete=plates 																	1.5		# Betonplattenwege
+	switch surface=concrete|paving_stones|wood|metal							0.5		# Beton, Pflastersteine (geschnitzt), Holz, Metall
+	switch surface=cobblestone|sett switch smoothness=good|excellent	1 2		# Kopfsteinpflaster
+	# switch surface=unhewn_cobblestone 											3.0		# ungeschnitzter Pflasterstein
+	switch concrete=lanes																	1.5		# Betonspurplatten
+	switch surface=fine_gravel|compacted|gravel									0.0		# Splitt,verdichtete Oberflaesche
+	switch surface=grass_paver															0.3		# Rasengittersteine
+	switch surface=pebblestone|unpaved												0.1		# Schotter, Sand, Kies, unbefestigt
+	switch surface=ground|grass|dirt|earth|												1.0		# naturbelassene Oberfl sche, Gras, Schutz Schlamm...
+	switch surface=mud|clay|sand														5.0		# naturbelassene Oberfl sche, Gras, Schutz Schlamm...
+# if "surface" is not defined...
+	switch surface=
+		switch highway=primary|primary_link|secondary|secondary_link|tertiary|tertiary_link	0.0
+		switch highway=road|residential|unclassified 															0.0
+		switch highway=living_street 																					0.0
+		switch highway=service|cycleway																			0.0
+		switch tracktype=grade1 																						0.0
+		switch tracktype=grade2																						0.0
+		switch tracktype=grade3																						3.0
+		switch tracktype=grade4																						6.0
+		switch tracktype=grade5																						12.0
+		switch tracktype=																									6.0
+# surface not known and probably not paved / no asphalt...
+																																	0.5
+	0.5
+
+assign tracktypepenalty
+	switch tracktype=grade1	0.0
+	switch tracktype=grade2 	0.0
+	switch tracktype=grade3	1.0
+	switch tracktype=grade4	2.0
+	switch tracktype=grade5	4.0
+	switch tracktype=				2.0
+	0
+
+assign smoothnesspenalty =
+	switch smoothness=excellent			0
+	switch smoothness=good 				0
+	switch smoothness=intermediate	0.5
+	switch smoothness=bad					1.0
+	switch smoothness=very_bad			2.0
+	switch smoothness=horrible 			4.0
+	0
+
+assign maxspeedpenalty =
+	 switch maxspeed=50	0.2
+	 switch maxspeed=60	0.7
+	 switch maxspeed=70	1.2
+	 switch maxspeed=80	1.5
+	 switch maxspeed=90	2.0
+	 switch maxspeed=100	3.0
+	 switch maxspeed=110	11
+	 switch maxspeed=120	12
+	 switch maxspeed=130	13
+	 switch maxspeed=	
+		switch highway=primary|primary_link			2.0
+		switch highway=secondary|secondary_link	1.0
+		switch highway=tertiary|tertiary_link			0.5
+																		0.0
+	0.0
+
+assign footdesignated_penalty
+	switch foot=designated
+		switch bicycle=designated 0.0
+		1.0
+	0.0
+
+assign sum_highwaypenalty
+	add surfacepenalty
+	add tracktypepenalty
+	add smoothnesspenalty
+	add maxspeedpenalty
+	add footdesignated_penalty
+	0.0
+
+assign costfactor
+	add sum_highwaypenalty
+	switch or highway=proposed highway=abandoned 10000
+	min 9999
+	add max onewaypenalty accesspenalty
+	switch	highway=motorway|motorway_link								10000
+	switch	highway=trunk|trunk_link											30
+	switch	highway=primary|primary_link										4.0
+	switch	highway=secondary|secondary_link								3.0
+	switch	highway=tertiary|tertiary_link										2.0
+	switch	highway=unclassified													1.5
+	switch	highway=pedestrian													10
+	switch	highway=steps															100
+	switch	route=ferry																100
+	switch	highway=bridleway														100
+	switch	highway=cycleway switch foot=yes								2.5 2.0
+	switch	highway=living_street													1.8
+	switch	highway=residential switch bicycle_road=yes				1.1 1.8
+	switch	highway=service														1.5
+	switch	highway=track|road													1.0
+	switch	highway=path															2.0
+	switch	highway=footway switch bicycle=yes							2.5 5.0
+	20.0
+
+---context:node  # following code refers to node tags
+
+assign initialcost
+	0
